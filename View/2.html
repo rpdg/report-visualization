@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<link rel="stylesheet" href="css/highcharts.css">
+	<style>
+		*{
+			box-sizing: border-box;
+		}
+		#warp{
+			text-align: center;
+		}
+		.chartBody{
+			text-align: center;
+			margin: 0 auto 5em auto;
+			max-width: 1300px;
+		}
+		.chart {
+			display: inline-block;
+			width: 480px;
+			height: 300px;
+			border: 1px solid #999;
+			background-color: #fff;
+			margin: 10px;
+		}
+	</style>
+</head>
+<body>
+
+<div id="warp"></div>
+
+<script src="js/highcharts.js"></script>
+<script src="data.js"></script>
+<script>
+	var warp = document.getElementById("warp");
+
+	for(var key in reports){
+
+		var report = reports[key];
+		var dates = [];
+		var programCount = [];
+		var accomplishedProgramCount = [];
+		var totalProgramTimeLength = [];
+		var totalTaskDuration = [];
+		var efficiency = [];
+		var accomplishmentRatio = [];
+
+		for (var i = 0, l = report.length; i < l; i++) {
+			var dailyReport = report[i];
+			dates.push(dailyReport.BeginDate);
+			programCount.push(dailyReport.ProgramCount);
+			accomplishedProgramCount.push(dailyReport.AccomplishedProgramCount);
+			totalProgramTimeLength.push(+dailyReport.TotalProgramTimeLength.toFixed(1));
+			totalTaskDuration.push(+dailyReport.TotalTaskDuration.toFixed(1));
+			efficiency.push(dailyReport.Efficiency);
+			accomplishmentRatio.push(dailyReport.AccomplishmentRatio);
+		}
+
+		var chartBody = document.createElement("div");
+		chartBody.className = 'chartBody';
+		chartBody.innerHTML = '<h1>'+key+'</h1>';
+
+		var div1 = document.createElement("div");
+		div1.className = 'chart';
+		chartBody.appendChild(div1);
+		warp.appendChild(chartBody);
+
+		Highcharts.chart(div1, {
+			credits:{ enabled : false },
+			chart: { type: 'column' },
+			title: { text: '节目数量/完成数' },
+			subTitle: { text: key },
+			legend: {align: 'right'},
+			xAxis: {
+				categories: dates ,
+			},
+			yAxis: {
+				allowDecimals: false,
+				maxPadding : 0.001,
+				min: 0,
+				title: {
+					text: '数量',
+					align: 'high'
+				}
+			},
+			plotOptions: {
+				column: {
+					pointPadding: 0.05,
+					borderWidth: 0
+				}
+			},
+			series: [{
+				name: '总数',
+				data: programCount
+			}, {
+				name: '完成数',
+				data: accomplishedProgramCount,
+				color: '#639c67'
+			}]
+		});
+
+
+		var div2 = document.createElement("div");
+		div2.className = 'chart';
+		chartBody.appendChild(div2);
+		warp.appendChild(chartBody);
+
+		Highcharts.chart(div2, {
+			credits:{ enabled : false },
+			chart: { type: 'column' },
+			title: { text: '时长/耗时' },
+			subTitle: { text: key },
+			legend: {align: 'right'},
+			xAxis: {
+				categories: dates ,
+			},
+			yAxis: {
+				allowDecimals: true,
+				maxPadding : 0.001,
+				min: 0,
+				title: {
+					text: '时长（分）',
+					align: 'high'
+				}
+			},
+			plotOptions: {
+				column: {
+					pointPadding: 0.05,
+					borderWidth: 0
+				}
+			},
+			tooltip: {
+
+			},
+			series: [{
+				name: '节目时长',
+				data: totalProgramTimeLength
+			},{
+				name: '耗时',
+				data: totalTaskDuration,
+				color: '#da8441'
+			}]
+		});
+
+
+		var div3 = document.createElement("div");
+		div3.className = 'chart';
+		chartBody.appendChild(div3);
+		warp.appendChild(chartBody);
+
+		Highcharts.chart(div3, {
+			credits:{ enabled : false },
+			chart: { type: 'line' },
+			title: { text: '完成率' },
+			subTitle: { text: key },
+			legend: {align: 'right'},
+			xAxis: {
+				categories: dates ,
+			},
+			yAxis: {
+				allowDecimals: true,
+				maxPadding : 0.001,
+				min: 0 ,
+				max: 100,
+				title:{
+					text: '完成率 %',
+					align: 'high'
+				}
+			},
+			plotOptions: {
+				column: {
+					pointPadding: 0.1,
+					borderWidth: 0
+				}
+			},
+			series:[{
+				name: '完成率',
+				data: accomplishmentRatio
+			}]
+		});
+
+		var div4 = document.createElement("div");
+		div4.className = 'chart';
+		chartBody.appendChild(div4);
+		warp.appendChild(chartBody);
+
+		Highcharts.chart(div4, {
+			credits:{ enabled : false },
+			chart: { type: 'line' },
+			title: { text: '生产效率' },
+			subTitle: { text: key },
+			legend: {align: 'right'},
+			xAxis: {
+				categories: dates ,
+			},
+			yAxis: {
+				allowDecimals: true,
+				maxPadding : 0.001,
+				min: 0 ,
+				//tickAmount: 1,
+				title:{
+					text: '生产效率',
+					align: 'high'
+				}
+			},
+			plotOptions: {
+				column: {
+					pointPadding: 0.1,
+					borderWidth: 0
+				}
+			},
+			series:[{
+				name: '生产效率',
+				data: efficiency
+			}]
+		});
+
+	}
+</script>
+</body>
+</html>
