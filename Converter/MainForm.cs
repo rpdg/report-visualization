@@ -14,9 +14,9 @@ using System.IO;
 using System.Data;
 using Converter.Util;
 
-using System.Diagnostics;  
-using System.Runtime.InteropServices;  
-using System.Threading;  
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Converter
 {
@@ -25,27 +25,31 @@ namespace Converter
 	/// </summary>
 	public partial class MainForm : Form
 	{
+		string jsonString ;
+		string sourceFileName ;
+		
+		
 		public MainForm()
 		{
 			//
 			// The InitializeComponent() call is required for Windows Forms designer support.
 			//
 			InitializeComponent();
-			//Control.CheckForIllegalCrossThreadCalls = false;  
+			//Control.CheckForIllegalCrossThreadCalls = false;
 			
 			//
 			// TODO: Add constructor code after the InitializeComponent() call.
 			//
 		}
 		
-		//Thread drawThread = null;              
-        //delegate void drawDelegate(int i); 
-        
-        
+		//Thread drawThread = null;
+		//delegate void drawDelegate(int i);
+		
+		
 		void Button1Click(object sender, EventArgs e)
 		{
 			richTextBox1.Text = "";
-			Stream myStream = null;
+			
 			
 			OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
@@ -55,18 +59,23 @@ namespace Converter
 			openFileDialog1.RestoreDirectory = false;
 
 			if (openFileDialog1.ShowDialog() == DialogResult.OK) {
-				string sourceFileName = openFileDialog1.FileName;
+				
+				
+				sourceFileName = openFileDialog1.FileName;
+				
 				string directoryPath = Path.GetDirectoryName(sourceFileName);
 				openFileDialog1.InitialDirectory = directoryPath ;
 				
 				textBox1.Text = sourceFileName;
 				
+				Stream myStream = null;
 				try {
 					if ((myStream = openFileDialog1.OpenFile()) != null) {
 						
 						string sheetsJson = Parser.Excel2Json(myStream);
 						richTextBox1.Text = sheetsJson;
-						SaveFile.IntoHTML(sheetsJson , sourceFileName);
+						jsonString = sheetsJson;
+						
 					}
 				} catch (Exception ex) {
 					//MessageBox.Show("Error:  " + ex.Message);
@@ -74,9 +83,21 @@ namespace Converter
 				}
 			}
 		}
+		
 		void Label1Click(object sender, EventArgs e)
 		{
-	
+			
+		}
+		
+		void Button2Click(object sender, EventArgs e)
+		{
+			
+			SaveFile.ToHTML(jsonString , sourceFileName);
+		}
+		void Button3Click(object sender, EventArgs e)
+		{
+			
+			SaveFile.ToPng(jsonString , sourceFileName);
 		}
 	}
 }

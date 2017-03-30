@@ -8,3 +8,9 @@ D:\ams_analyze\Converter\obj\Debug\Converter.MainForm.resources
 D:\ams_analyze\Converter\obj\Debug\Converter.csproj.GenerateResource.Cache
 D:\ams_analyze\Converter\obj\Debug\Converter.exe
 D:\ams_analyze\Converter\obj\Debug\Converter.pdb
+D:\ams_analyze\Converter\bin\Debug\Aspose.Cells.GridDesktop.dll
+D:\ams_analyze\Converter\bin\Debug\Aspose.Cells.GridWeb.dll
+D:\ams_analyze\Converter\bin\Debug\NReco.ImageGenerator.dll
+D:\ams_analyze\Converter\bin\Debug\Aspose.Cells.GridDesktop.xml
+D:\ams_analyze\Converter\bin\Debug\Aspose.Cells.GridWeb.xml
+D:\ams_analyze\Converter\bin\Debug\NReco.ImageGenerator.xml

@@ -42,12 +42,12 @@ namespace Converter.Util
 					Worksheet worksheet = workbook.Worksheets[i];
 					//foreach (Worksheet worksheet in workbook.Worksheets) {
 					
-					string sheetName = worksheet.Name ;
+					string sheetName = worksheet.Name;
 					
-					if(sheetName != "分析"){
+					if (sheetName != "分析") {
 						DataTable tb = worksheet.Cells.ExportDataTable(0, 0, worksheet.Cells.MaxRow + 1, worksheet.Cells.MaxColumn + 1, true);
 						//ds.Tables.Add(tb);
-						List<DailyReport> drps = DataTable2DailyReport(tb , sheetName);
+						List<DailyReport> drps = DataTable2DailyReport(tb, sheetName);
 						dic.Add(worksheet.Name, drps);
 					}
 					
@@ -64,11 +64,11 @@ namespace Converter.Util
 		/// <param name="tbSrc"></param>
 		/// <param name="tbName"></param>
 		/// <returns></returns>
-		public static List<DailyReport> DataTable2DailyReport(DataTable tbSrc , string tbName)
+		public static List<DailyReport> DataTable2DailyReport(DataTable tbSrc, string tbName)
 		{
 			/*var rows = tb.AsEnumerable();
 			
-			var query = from q in rows
+			var query = from q in rows 
 				group q by q.Field<DateTime>("BEGIN_TIME").ToString("yyyy/MM/dd") into r
 				select new DailyReport{
 					ProgramCount = r.Count() ,
@@ -77,15 +77,23 @@ namespace Converter.Util
 			
 			return query.ToList();*/
 			
-			DataView dv = tbSrc.DefaultView;
-			dv.Sort = "BEGIN_TIME Asc";
+			DataView dv = tbSrc.DefaultView; 
+			dv.Sort = "BEGIN_TIME Asc"; 
 			DataTable tb = dv.ToTable();
 			
 			var rptList = new List<DailyReport>();
 			
-			var dic = new Dictionary<string , List<ProduceItem>>();
+			var dic = new Dictionary<string , int>();
 			
-			for (int j = 0; j < tb.Rows.Count; j++) {
+			
+			string previousDateKey = "";
+			decimal currentDateStarted = 0;
+			decimal currentDateFinished = 0;
+			decimal currentDateTotalLength = 0;
+			decimal currentDateTotalTaskDuration = 0;
+			
+			int l = tb.Rows.Count ;
+			for (int j = 0; j < l; j++) {
 				
 				DataRow row = tb.Rows[j];
 				
@@ -95,35 +103,81 @@ namespace Converter.Util
 					TaskDuration = row[6].TryToDecimal(),
 				};
 				
-				var beginStr = row[4].TrimToString();
+				var beginDateString = row[4].TrimToString();
 				
-				if (!string.IsNullOrEmpty(beginStr)) {
+				if (!string.IsNullOrEmpty(beginDateString)) {
 					
 					try {
-						item.Begin = DateTime.Parse(beginStr);
+						item.Begin = DateTime.Parse(beginDateString);
+					
+					
+						var endDateString = row[5].TrimToString();
+						if (!string.IsNullOrEmpty(endDateString))
+							item.End = DateTime.Parse(endDateString);
 						
 						
-						var endStr = row[5].TrimToString();
-						if (!string.IsNullOrEmpty(endStr))
-							item.End = DateTime.Parse(endStr);
+						string currentDateKey = item.Begin.ToString("yyyy-MM-dd");
 						
-						
-						string key = item.Begin.ToString("yyyy-MM-dd");
-						
-						if (!dic.ContainsKey(key)) {
-							dic.Add(key, new List<ProduceItem>());
+						if (previousDateKey != currentDateKey ) {
+							
+							if (!string.IsNullOrEmpty(previousDateKey)) {
+								var dailyReport = new DailyReport() {
+									BeginDate = previousDateKey,
+									ProgramCount = (int)currentDateStarted,
+									AccomplishedProgramCount = (int)currentDateFinished,
+									TotalProgramTimeLength = currentDateTotalLength,
+									TotalTaskDuration = currentDateTotalTaskDuration,
+								};
+								if (currentDateFinished > 0) {
+									//平均时长
+									dailyReport.AverageProgramTimeLength = Math.Round(currentDateTotalLength / currentDateFinished, 1);
+					
+									//平均耗时
+									dailyReport.AverageTaskDuration = Math.Round(currentDateTotalTaskDuration / currentDateFinished, 1);
+				
+									//完成率(百分数)
+									dailyReport.AccomplishmentRatio = Math.Round(currentDateFinished / currentDateStarted * 100, 2);
+					
+									//效率
+									//excel统计中，会将几秒钟的任务认为是0分钟，所以会出现执行时长为0的情况
+									if (currentDateTotalTaskDuration > 0)
+										dailyReport.Efficiency = Math.Round(currentDateTotalLength / currentDateTotalTaskDuration, 2);
+								}
+							
+								rptList.Add(dailyReport);
+							
+							}
+							
+							previousDateKey = currentDateKey;
+							currentDateStarted = 0;
+							currentDateFinished = 0;
+							currentDateTotalLength = 0;
+							currentDateTotalTaskDuration = 0;
+							
+							
+							dic.Add(currentDateKey, 1);
 						}
 						
-						dic[key].Add(item);
+						currentDateStarted++;
+						currentDateTotalLength += item.ProgramLength;
+						if (item.End != null) {
+							currentDateFinished++;
+							currentDateTotalTaskDuration += item.TaskDuration;
+						}
+						
+						
+						//dic[currentDateKey].Add(item);
+						
 					} catch (Exception e) {
 						throw new Exception(tbName + ", 第" + j + "行发生错误");
 					}
 				}
-				
+					
 				
 				
 			}
 			
+			/*
 			foreach (string dateKey in dic.Keys) {
 				var list = dic[dateKey];
 				
@@ -132,14 +186,13 @@ namespace Converter.Util
 				decimal totalTaskDuration = 0;
 				
 
-				int progCount = list.Count;
-				for (int i = 0; i < progCount; i++) {
+				for (int i = 0; i < list.Count; i++) {
 					var item = list[i];
 					if (item.End != null) {
-						
+					
 						finished++;
 						
-						totalLength += item.ProgramLength;
+						totalLength += item.Length;
 						
 						totalTaskDuration += item.TaskDuration;
 					}
@@ -148,31 +201,31 @@ namespace Converter.Util
 				
 				var rpt = new DailyReport() {
 					BeginDate = dateKey,
-					ProgramCount = progCount ,
+					ProgramCount = list.Count,
 					AccomplishedProgramCount = (int)finished,
 					TotalProgramTimeLength = totalLength,
 					TotalTaskDuration = totalTaskDuration,
 				};
 				
-					if (finished > 0) {
-						//平均时长
-						rpt.AverageProgramTimeLength = Math.Round(totalLength / finished, 1);
-						
-						//平均耗时
-						rpt.AverageTaskDuration = Math.Round(totalTaskDuration / finished, 1);
-						
-						//完成率(百分数)
-						rpt.AccomplishmentRatio = Math.Round(finished / progCount * 100, 2);
-						
-						//效率
-						//excel统计中，会将几秒钟的任务认为是0分钟，所以会出现执行时长为0的情况
-						if (totalTaskDuration > 0)
-							rpt.Efficiency = Math.Round(totalLength / totalTaskDuration , 2);
-					}
 				
+				if (finished > 0) {
+					//平均时长
+					rpt.AverageProgramTimeLength = Math.Round(totalLength / rpt.AccomplishedProgramCount, 1);
+					
+					//平均耗时
+					rpt.AverageTaskDuration = Math.Round(totalTaskDuration / rpt.AccomplishedProgramCount, 1);
+				
+					//完成率(百分数)
+					rpt.AccomplishmentRatio = Math.Round(finished / rpt.ProgramCount * 100, 2);
+					
+					//效率
+					//excel统计中，会将几秒钟的任务认为是0分钟，所以会出现执行时长为0的情况
+					if (totalTaskDuration > 0)
+						rpt.Efficiency = Math.Round(totalLength / totalTaskDuration, 2);
+				}
 				rptList.Add(rpt);
 			}
-			
+			*/
 			
 			return rptList;
 		}

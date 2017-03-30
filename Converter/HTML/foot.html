@@ -36,7 +36,7 @@
 
 		Highcharts.chart(div1, {
 			credits:{ enabled : false },
-			chart: { type: 'column' },
+			chart: { type: 'column'  },
 			title: { text: '节目数量 / 完成数' },
 			//subtitle: { text: key },
 			legend: {align: 'right'},
@@ -60,10 +60,11 @@
 			},
 			series: [{
 				name: '总数',
-				data: programCount
+				data: programCount, animation :false ,
+				color: '#7cb5ec'
 			}, {
 				name: '完成数',
-				data: accomplishedProgramCount,
+				data: accomplishedProgramCount, animation :false,
 				color: '#639c67'
 			}]
 		});
@@ -103,10 +104,11 @@
 			},
 			series: [{
 				name: '节目时长',
-				data: totalProgramTimeLength
+				data: totalProgramTimeLength, animation :false,
+				color: '#7cb5ec'
 			},{
 				name: '耗时',
-				data: totalTaskDuration,
+				data: totalTaskDuration, animation :false,
 				color: '#da8441'
 			}]
 		});
@@ -140,6 +142,7 @@
 				line: {
 					dataLabels: {
 						enabled: true ,
+						style: { "fontSize": "11px", "fontWeight": "normal" },
 						formatter: function (){
 							return this.y + "%";
 						}
@@ -149,7 +152,8 @@
 			},
 			series:[{
 				name: '完成率',
-				data: accomplishmentRatio
+				color: '#7cb5ec',
+				data: accomplishmentRatio, animation :false
 			}]
 		});
 
@@ -181,6 +185,7 @@
 				line: {
 					dataLabels: {
 						enabled: true,
+						style: { "fontSize": "11px", "fontWeight": "normal" },
 						formatter: function (){
 							return '1:' + (1/this.y).toFixed(1);
 						}
@@ -190,7 +195,8 @@
 			},
 			series:[{
 				name: '生产效率',
-				data: efficiency
+				color: '#7cb5ec',
+				data: efficiency, animation :false
 			}]
 		});
 
