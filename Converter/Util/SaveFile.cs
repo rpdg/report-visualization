@@ -14,23 +14,28 @@ namespace Converter.Util
 	/// <summary>
 	/// Description of SaveHTML.
 	/// </summary>
-	public static class Save
+	public static class SaveFile
 	{
 		public static void IntoHTML(string json , string fileName)
 		{
 			string outFile = fileName.Substring(0 , fileName.LastIndexOf("." , StringComparison.CurrentCultureIgnoreCase)) ;
 			// Write the string to a file.
-			StreamWriter file = new System.IO.StreamWriter(outFile + ".html");
+			StreamWriter fileStream = new System.IO.StreamWriter(outFile + ".html");
 			
-			string dir = System.Environment.CurrentDirectory;
+			using(fileStream){
+				string dir = System.Environment.CurrentDirectory;
 			
-			string h1 = File.ReadAllText(dir+"\\HTML\\head.html");
-			string h2 = File.ReadAllText(dir+"\\HTML\\foot.html");
-			file.WriteLine(h1);
-			file.WriteLine(json);
-			file.WriteLine(h2);
+				string h1 = File.ReadAllText(dir + "\\HTML\\head.html");
+				string h2 = File.ReadAllText(dir + "\\HTML\\foot.html");
 			
-			file.Close();
+				fileStream.WriteLine("<title>"+outFile+"</title>");
+				fileStream.WriteLine(h1);
+				fileStream.WriteLine(json);
+				fileStream.WriteLine(h2);
+			
+				fileStream.Close();
+			}
+			
 		}
 	}
 }

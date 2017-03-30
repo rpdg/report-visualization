@@ -8,6 +8,9 @@
 		*{
 			box-sizing: border-box;
 		}
+		h1{
+			text-align:center;
+		}
 		#warp{
 			text-align: center;
 		}
@@ -51,8 +54,8 @@
 			dates.push(dailyReport.BeginDate);
 			programCount.push(dailyReport.ProgramCount);
 			accomplishedProgramCount.push(dailyReport.AccomplishedProgramCount);
-			totalProgramTimeLength.push(+dailyReport.TotalProgramTimeLength.toFixed(1));
-			totalTaskDuration.push(+dailyReport.TotalTaskDuration.toFixed(1));
+			totalProgramTimeLength.push(+ (dailyReport.TotalProgramTimeLength /60).toFixed(1));
+			totalTaskDuration.push(+ (dailyReport.TotalTaskDuration /60).toFixed(1));
 			efficiency.push(dailyReport.Efficiency);
 			accomplishmentRatio.push(dailyReport.AccomplishmentRatio);
 		}
@@ -69,8 +72,8 @@
 		Highcharts.chart(div1, {
 			credits:{ enabled : false },
 			chart: { type: 'column' },
-			title: { text: '节目数量/完成数' },
-			subTitle: { text: key },
+			title: { text: '节目数量 / 完成数' },
+			//subtitle: { text: key },
 			legend: {align: 'right'},
 			xAxis: {
 				categories: dates ,
@@ -109,8 +112,8 @@
 		Highcharts.chart(div2, {
 			credits:{ enabled : false },
 			chart: { type: 'column' },
-			title: { text: '时长/耗时' },
-			subTitle: { text: key },
+			title: { text: '总时长 / 总耗时' },
+			subtitle: { text: '单位：小时' },
 			legend: {align: 'right'},
 			xAxis: {
 				categories: dates ,
@@ -120,7 +123,7 @@
 				maxPadding : 0.001,
 				min: 0,
 				title: {
-					text: '时长（分）',
+					text: '时长（小时）',
 					align: 'high'
 				}
 			},
@@ -153,8 +156,8 @@
 			credits:{ enabled : false },
 			chart: { type: 'line' },
 			title: { text: '完成率' },
-			subTitle: { text: key },
-			legend: {align: 'right'},
+			//subtitle: { text: key },
+			legend: {align: 'right' , enabled: false},
 			xAxis: {
 				categories: dates ,
 			},
@@ -169,9 +172,14 @@
 				}
 			},
 			plotOptions: {
-				column: {
-					pointPadding: 0.1,
-					borderWidth: 0
+				line: {
+					dataLabels: {
+						enabled: true ,
+						formatter: function (){
+							return this.y + "%";
+						}
+					},
+					enableMouseTracking: false
 				}
 			},
 			series:[{
@@ -189,8 +197,8 @@
 			credits:{ enabled : false },
 			chart: { type: 'line' },
 			title: { text: '生产效率' },
-			subTitle: { text: key },
-			legend: {align: 'right'},
+			//subtitle: { text: key },
+			legend: {align: 'right' , enabled: false },
 			xAxis: {
 				categories: dates ,
 			},
@@ -205,9 +213,14 @@
 				}
 			},
 			plotOptions: {
-				column: {
-					pointPadding: 0.1,
-					borderWidth: 0
+				line: {
+					dataLabels: {
+						enabled: true,
+						formatter: function (){
+							return '1:' + (1/this.y).toFixed(1);
+						}
+					},
+					enableMouseTracking: false
 				}
 			},
 			series:[{

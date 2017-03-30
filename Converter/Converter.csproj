@@ -90,7 +90,7 @@
     <Compile Include="Util\ConvertHelper.cs" />
     <Compile Include="Util\JsonHelper.cs" />
     <Compile Include="Util\Parser.cs" />
-    <Compile Include="Util\Save.cs" />
+    <Compile Include="Util\SaveFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

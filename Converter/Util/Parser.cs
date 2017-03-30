@@ -68,7 +68,7 @@ namespace Converter.Util
 		{
 			/*var rows = tb.AsEnumerable();
 			
-			var query = from q in rows 
+			var query = from q in rows
 				group q by q.Field<DateTime>("BEGIN_TIME").ToString("yyyy/MM/dd") into r
 				select new DailyReport{
 					ProgramCount = r.Count() ,
@@ -77,8 +77,8 @@ namespace Converter.Util
 			
 			return query.ToList();*/
 			
-			DataView dv = tbSrc.DefaultView; 
-			dv.Sort = "BEGIN_TIME Asc"; 
+			DataView dv = tbSrc.DefaultView;
+			dv.Sort = "BEGIN_TIME Asc";
 			DataTable tb = dv.ToTable();
 			
 			var rptList = new List<DailyReport>();
@@ -91,21 +91,21 @@ namespace Converter.Util
 				
 				
 				var item = new ProduceItem {
-					Length = row[2].TryToDecimal(),
+					ProgramLength = row[2].TryToDecimal(),
 					TaskDuration = row[6].TryToDecimal(),
 				};
 				
-				var bs = row[4].TrimToString();
+				var beginStr = row[4].TrimToString();
 				
-				if (!string.IsNullOrEmpty(bs)) {
+				if (!string.IsNullOrEmpty(beginStr)) {
 					
 					try {
-						item.Begin = DateTime.Parse(bs);
-					
-					
-						var es = row[5].TrimToString();
-						if (!string.IsNullOrEmpty(es))
-							item.End = DateTime.Parse(es);
+						item.Begin = DateTime.Parse(beginStr);
+						
+						
+						var endStr = row[5].TrimToString();
+						if (!string.IsNullOrEmpty(endStr))
+							item.End = DateTime.Parse(endStr);
 						
 						
 						string key = item.Begin.ToString("yyyy-MM-dd");
@@ -119,7 +119,7 @@ namespace Converter.Util
 						throw new Exception(tbName + ", 第" + j + "行发生错误");
 					}
 				}
-					
+				
 				
 				
 			}
@@ -132,13 +132,14 @@ namespace Converter.Util
 				decimal totalTaskDuration = 0;
 				
 
-				for (int i = 0; i < list.Count; i++) {
+				int progCount = list.Count;
+				for (int i = 0; i < progCount; i++) {
 					var item = list[i];
 					if (item.End != null) {
-					
+						
 						finished++;
 						
-						totalLength += item.Length;
+						totalLength += item.ProgramLength;
 						
 						totalTaskDuration += item.TaskDuration;
 					}
@@ -147,25 +148,27 @@ namespace Converter.Util
 				
 				var rpt = new DailyReport() {
 					BeginDate = dateKey,
-					ProgramCount = list.Count,
+					ProgramCount = progCount ,
 					AccomplishedProgramCount = (int)finished,
 					TotalProgramTimeLength = totalLength,
 					TotalTaskDuration = totalTaskDuration,
 				};
 				
-				if (finished > 0) {
-					//平均时长
-					rpt.AverageProgramTimeLength = Math.Round(totalLength / rpt.AccomplishedProgramCount, 1);
-					
-					//平均耗时
-					rpt.AverageTaskDuration = Math.Round(totalTaskDuration / rpt.AccomplishedProgramCount, 1);
-				
-					//完成率(百分数)
-					rpt.AccomplishmentRatio = Math.Round(finished / rpt.ProgramCount * 100, 2);
-				
-					//效率
-					rpt.Efficiency = Math.Round(totalLength / totalTaskDuration , 2);
-				}
+					if (finished > 0) {
+						//平均时长
+						rpt.AverageProgramTimeLength = Math.Round(totalLength / finished, 1);
+						
+						//平均耗时
+						rpt.AverageTaskDuration = Math.Round(totalTaskDuration / finished, 1);
+						
+						//完成率(百分数)
+						rpt.AccomplishmentRatio = Math.Round(finished / progCount * 100, 2);
+						
+						//效率
+						//excel统计中，会将几秒钟的任务认为是0分钟，所以会出现执行时长为0的情况
+						if (totalTaskDuration > 0)
+							rpt.Efficiency = Math.Round(totalLength / totalTaskDuration , 2);
+					}
 				
 				rptList.Add(rpt);
 			}

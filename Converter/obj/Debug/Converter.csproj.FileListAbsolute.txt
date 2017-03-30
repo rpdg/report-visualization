@@ -2,8 +2,6 @@ D:\ams_analyze\Converter\bin\Debug\Converter.exe.config
 D:\ams_analyze\Converter\bin\Debug\Converter.exe
 D:\ams_analyze\Converter\bin\Debug\Converter.pdb
 D:\ams_analyze\Converter\bin\Debug\Aspose.Cells.dll
-D:\ams_analyze\Converter\bin\Debug\Aspose.Cells.GridDesktop.dll
-D:\ams_analyze\Converter\bin\Debug\Aspose.Cells.GridWeb.dll
 D:\ams_analyze\Converter\bin\Debug\Newtonsoft.Json.dll
 D:\ams_analyze\Converter\obj\Debug\Converter.csprojResolveAssemblyReference.cache
 D:\ams_analyze\Converter\obj\Debug\Converter.MainForm.resources

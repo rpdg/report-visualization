@@ -48,7 +48,7 @@ namespace Converter.Model
 	public class ProduceItem
 	{
 		//节目时长(分)
-		public decimal Length {get; set;}
+		public decimal ProgramLength {get; set;}
 		
 		//BEGIN_TIME
 		public DateTime Begin {get; set;}

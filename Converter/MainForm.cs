@@ -44,7 +44,9 @@ namespace Converter
         
 		void Button1Click(object sender, EventArgs e)
 		{
+			richTextBox1.Text = "";
 			Stream myStream = null;
+			
 			OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
 			//openFileDialog1.InitialDirectory = "c:\\";
@@ -64,7 +66,7 @@ namespace Converter
 						
 						string sheetsJson = Parser.Excel2Json(myStream);
 						richTextBox1.Text = sheetsJson;
-						Save.IntoHTML(sheetsJson , sourceFileName);
+						SaveFile.IntoHTML(sheetsJson , sourceFileName);
 					}
 				} catch (Exception ex) {
 					//MessageBox.Show("Error:  " + ex.Message);
