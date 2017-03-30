@@ -75,6 +75,7 @@ namespace Converter
 			// 
 			// button2
 			// 
+			this.button2.Enabled = false;
 			this.button2.Location = new System.Drawing.Point(552, 12);
 			this.button2.Name = "button2";
 			this.button2.Size = new System.Drawing.Size(75, 23);
@@ -85,6 +86,7 @@ namespace Converter
 			// 
 			// button3
 			// 
+			this.button3.Enabled = false;
 			this.button3.Location = new System.Drawing.Point(633, 11);
 			this.button3.Name = "button3";
 			this.button3.Size = new System.Drawing.Size(75, 23);

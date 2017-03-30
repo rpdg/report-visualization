@@ -18,21 +18,102 @@ using System.Linq;
 
 namespace Converter.Util
 {
+	class LightCellsDataHandlerVisitCells : LightCellsDataHandler
+	{
+		private int cellCount;
+		private int formulaCount;
+		private int stringCount;
+
+		internal LightCellsDataHandlerVisitCells()
+		{
+			cellCount = 0;
+			formulaCount = 0;
+			stringCount = 0;
+		}
+
+		public int CellCount {
+			get { return cellCount; }
+		}
+
+		public int FormulaCount {
+			get { return formulaCount; }
+		}
+
+		public int StringCount {
+			get { return stringCount; }
+		}
+
+		public bool StartSheet(Worksheet sheet)
+		{
+			Console.WriteLine("Processing sheet[" + sheet.Name + "]");
+			return true;
+		}
+
+		public bool StartRow(int rowIndex)
+		{
+			return true;
+		}
+
+		public bool ProcessRow(Row row)
+		{
+			return true;
+		}
+
+		public bool StartCell(int column)
+		{
+			return true;
+		}
+
+		public bool ProcessCell(Cell cell)
+		{
+			cellCount++;
+			if (cell.IsFormula) {
+				formulaCount++;
+			} else if (cell.Type == CellValueType.IsString) {
+				stringCount++;
+			}
+			return false;
+		}
+	}
+	
+	
 	/// <summary>
 	/// Description of Parser.
 	/// </summary>
 	public static class Parser
 	{
+		public static string Excel2Json(string fileFullName)
+		{
+			Workbook workbook = new Workbook(fileFullName);
+				
+			var ds = new DataSet();
+			var dic = new Dictionary<String, List<DailyReport>>();
+				
+			for (int i = 0; i < workbook.Worksheets.Count; i++) {
+				Worksheet worksheet = workbook.Worksheets[i];
+				//foreach (Worksheet worksheet in workbook.Worksheets) {
+					
+				string sheetName = worksheet.Name;
+					
+				if (sheetName != "分析") {
+					DataTable tb = worksheet.Cells.ExportDataTable(0, 0, worksheet.Cells.MaxRow + 1, worksheet.Cells.MaxColumn + 1, true);
+					//ds.Tables.Add(tb);
+					List<DailyReport> drps = DataTable2DailyReport(tb, sheetName);
+					dic.Add(worksheet.Name, drps);
+				}
+					
+			}
+				
+			return JsonHelper.Serialize(dic);
+		}
 		
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="stream"></param>
-		/// <returns></returns>
 		public static string Excel2Json(Stream stream)
 		{
 			using (stream) {
-				Workbook workbook = new Workbook(stream);
+				LoadOptions opts = new LoadOptions();
+				//opts.LightCellsDataHandler = new LightCellsDataHandlerVisitCells();
+				
+				Workbook workbook = new Workbook(stream, opts);
 				stream.Close();
 				
 				var ds = new DataSet();
@@ -42,12 +123,12 @@ namespace Converter.Util
 					Worksheet worksheet = workbook.Worksheets[i];
 					//foreach (Worksheet worksheet in workbook.Worksheets) {
 					
-					string sheetName = worksheet.Name ;
+					string sheetName = worksheet.Name;
 					
-					if(sheetName != "分析"){
+					if (sheetName != "分析") {
 						DataTable tb = worksheet.Cells.ExportDataTable(0, 0, worksheet.Cells.MaxRow + 1, worksheet.Cells.MaxColumn + 1, true);
 						//ds.Tables.Add(tb);
-						List<DailyReport> drps = DataTable2DailyReport(tb , sheetName);
+						List<DailyReport> drps = DataTable2DailyReport(tb, sheetName);
 						dic.Add(worksheet.Name, drps);
 					}
 					
@@ -64,7 +145,7 @@ namespace Converter.Util
 		/// <param name="tbSrc"></param>
 		/// <param name="tbName"></param>
 		/// <returns></returns>
-		public static List<DailyReport> DataTable2DailyReport(DataTable tbSrc , string tbName)
+		public static List<DailyReport> DataTable2DailyReport(DataTable tbSrc, string tbName)
 		{
 			/*var rows = tb.AsEnumerable();
 			
@@ -148,27 +229,27 @@ namespace Converter.Util
 				
 				var rpt = new DailyReport() {
 					BeginDate = dateKey,
-					ProgramCount = progCount ,
+					ProgramCount = progCount,
 					AccomplishedProgramCount = (int)finished,
 					TotalProgramTimeLength = totalLength,
 					TotalTaskDuration = totalTaskDuration,
 				};
 				
-					if (finished > 0) {
-						//平均时长
-						rpt.AverageProgramTimeLength = Math.Round(totalLength / finished, 1);
-						
-						//平均耗时
-						rpt.AverageTaskDuration = Math.Round(totalTaskDuration / finished, 1);
-						
-						//完成率(百分数)
-						rpt.AccomplishmentRatio = Math.Round(finished / progCount * 100, 2);
-						
-						//效率
-						//excel统计中，会将几秒钟的任务认为是0分钟，所以会出现执行时长为0的情况
-						if (totalTaskDuration > 0)
-							rpt.Efficiency = Math.Round(totalLength / totalTaskDuration , 2);
-					}
+				if (finished > 0) {
+					//平均时长
+					rpt.AverageProgramTimeLength = Math.Round(totalLength / finished, 1);
+					
+					//平均耗时
+					rpt.AverageTaskDuration = Math.Round(totalTaskDuration / finished, 1);
+					
+					//完成率(百分数)
+					rpt.AccomplishmentRatio = Math.Round(finished / progCount * 100, 2);
+					
+					//效率
+					//excel统计中，会将几秒钟的任务认为是0分钟，所以会出现执行时长为0的情况
+					if (totalTaskDuration > 0)
+						rpt.Efficiency = Math.Round(totalLength / totalTaskDuration, 2);
+				}
 				
 				rptList.Add(rpt);
 			}

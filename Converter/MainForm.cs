@@ -17,6 +17,7 @@ using Converter.Util;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.ComponentModel;
 
 namespace Converter
 {
@@ -25,8 +26,10 @@ namespace Converter
 	/// </summary>
 	public partial class MainForm : Form
 	{
-		string jsonString ;
-		string sourceFileName ;
+		string sheetJson;
+		string sourceFileName;
+		
+		BackgroundWorker m_oWorker;
 		
 		
 		public MainForm()
@@ -37,19 +40,42 @@ namespace Converter
 			InitializeComponent();
 			//Control.CheckForIllegalCrossThreadCalls = false;
 			
-			//
-			// TODO: Add constructor code after the InitializeComponent() call.
-			//
+			
+			
+			m_oWorker = new BackgroundWorker();
+    
+			// Create a background worker thread that ReportsProgress &
+			// SupportsCancellation
+			// Hook up the appropriate events.
+			m_oWorker.DoWork += new DoWorkEventHandler(m_oWorker_DoWork);
+			//m_oWorker.ProgressChanged += new ProgressChangedEventHandler(m_oWorker_ProgressChanged);
+			m_oWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_oWorker_RunWorkerCompleted);
+			//m_oWorker.WorkerReportsProgress = true;
+			//m_oWorker.WorkerSupportsCancellation = true;
 		}
 		
-		//Thread drawThread = null;
-		//delegate void drawDelegate(int i);
+		void m_oWorker_DoWork(object sender, DoWorkEventArgs e)
+		{
+			sheetJson = Parser.Excel2Json(sourceFileName);
+		}
+		void m_oWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+		{
+			UpdateTxtMethod("excel 文档加载完成.");
+			button2.Enabled = true;
+			button3.Enabled = true;
+		}
+		
+		
+		
+		public void UpdateTxtMethod(string msg)
+		{
+			richTextBox1.AppendText(msg + "\r\n");
+			richTextBox1.ScrollToCaret();
+		}
 		
 		
 		void Button1Click(object sender, EventArgs e)
 		{
-			richTextBox1.Text = "";
-			
 			
 			OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
@@ -60,44 +86,50 @@ namespace Converter
 
 			if (openFileDialog1.ShowDialog() == DialogResult.OK) {
 				
-				
+				richTextBox1.Text = "开始载入文件";
 				sourceFileName = openFileDialog1.FileName;
 				
 				string directoryPath = Path.GetDirectoryName(sourceFileName);
-				openFileDialog1.InitialDirectory = directoryPath ;
+				openFileDialog1.InitialDirectory = directoryPath;
 				
 				textBox1.Text = sourceFileName;
+				button2.Enabled = false;
+				button3.Enabled = false;
+								
+				m_oWorker.RunWorkerAsync();
 				
-				Stream myStream = null;
+				/*Stream stream;
 				try {
-					if ((myStream = openFileDialog1.OpenFile()) != null) {
-						
-						string sheetsJson = Parser.Excel2Json(myStream);
-						richTextBox1.Text = sheetsJson;
-						jsonString = sheetsJson;
-						
+					if ((stream = openFileDialog1.OpenFile()) != null) {
+						using (stream) {
+							sheetJson = Parser.Excel2Json(stream);
+							stream.Close();
+						}
+
 					}
 				} catch (Exception ex) {
 					//MessageBox.Show("Error:  " + ex.Message);
-					richTextBox1.Text = "Error:  " + ex.Message;
-				}
+					UpdateTxtMethod("Error:  " + ex.Message);
+				}*/
 			}
 		}
 		
-		void Label1Click(object sender, EventArgs e)
-		{
-			
-		}
+		
+		
 		
 		void Button2Click(object sender, EventArgs e)
 		{
 			
-			SaveFile.ToHTML(jsonString , sourceFileName);
+			string fileName = SaveFile.ToHTML(sheetJson, sourceFileName);
+			UpdateTxtMethod(fileName + " 已保存");
+			
 		}
+		
+		
 		void Button3Click(object sender, EventArgs e)
 		{
-			
-			SaveFile.ToPng(jsonString , sourceFileName);
+			string fileName = SaveFile.ToPng(sheetJson, sourceFileName);
+			UpdateTxtMethod(fileName + " 已保存");
 		}
 	}
 }

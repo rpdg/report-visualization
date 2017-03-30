@@ -51,12 +51,6 @@
     <Reference Include="Aspose.Cells">
       <HintPath>dll\Aspose.Cells.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Cells.GridDesktop">
-      <HintPath>dll\Aspose.Cells.GridDesktop.dll</HintPath>
-    </Reference>
-    <Reference Include="Aspose.Cells.GridWeb">
-      <HintPath>dll\Aspose.Cells.GridWeb.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>

@@ -17,11 +17,11 @@ namespace Converter.Util
 	/// </summary>
 	public static class SaveFile
 	{
-		public static void ToHTML(string json, string fileName)
+		public static string ToHTML(string json, string fileName)
 		{
-			string outFile = fileName.Substring(0, fileName.LastIndexOf(".", StringComparison.CurrentCultureIgnoreCase));
+			string outFile = fileName.Substring(0, fileName.LastIndexOf(".", StringComparison.CurrentCultureIgnoreCase)) + ".html";
 			// Write the string to a file.
-			StreamWriter fileStream = new System.IO.StreamWriter(outFile + ".html");
+			StreamWriter fileStream = new System.IO.StreamWriter(outFile);
 			
 			using (fileStream) {
 				string dir = System.Environment.CurrentDirectory;
@@ -37,11 +37,13 @@ namespace Converter.Util
 				fileStream.Close();
 			}
 			
+			return outFile;
+			
 		}
 		
-		public static void ToPng(string json, string fileName)
+		public static string ToPng(string json, string fileName)
 		{
-			string outFile = fileName.Substring(0, fileName.LastIndexOf(".", StringComparison.CurrentCultureIgnoreCase));
+			string outFile = fileName.Substring(0, fileName.LastIndexOf(".", StringComparison.CurrentCultureIgnoreCase)) + ".png";
 			
 			string dir = System.Environment.CurrentDirectory;
 			
@@ -53,10 +55,12 @@ namespace Converter.Util
 			var bytes = imageCons.GenerateImage(h1 + json + h2, ImageFormat.Png);
 			
 
-			using (StreamWriter sw = new System.IO.StreamWriter(outFile + ".png")) {
-				sw.BaseStream.Write(bytes , 0 , bytes.Length-1);
+			using (StreamWriter sw = new System.IO.StreamWriter(outFile)) {
+				sw.BaseStream.Write(bytes, 0, bytes.Length - 1);
 				sw.Close();
 			}
+			
+			return outFile;
 		}
 	}
 

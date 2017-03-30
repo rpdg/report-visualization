@@ -6,3 +6,6 @@ D:\ams_analyze\Converter\obj\Release\Converter.csprojResolveAssemblyReference.ca
 D:\ams_analyze\Converter\obj\Release\Converter.MainForm.resources
 D:\ams_analyze\Converter\obj\Release\Converter.csproj.GenerateResource.Cache
 D:\ams_analyze\Converter\obj\Release\Converter.exe
+D:\ams_analyze\Converter\bin\Release\NReco.ImageGenerator.dll
+D:\ams_analyze\Converter\bin\Release\NReco.ImageGenerator.xml
+D:\ams_analyze\Converter\bin\Release\Aspose.Cells.xml
