@@ -28,6 +28,7 @@ namespace Converter
 	{
 		string sheetJson;
 		string sourceFileName;
+		string safeFileName;
 		
 		BackgroundWorker m_oWorker;
 		
@@ -43,7 +44,7 @@ namespace Converter
 			
 			
 			m_oWorker = new BackgroundWorker();
-    
+			
 			// Create a background worker thread that ReportsProgress &
 			// SupportsCancellation
 			// Hook up the appropriate events.
@@ -57,17 +58,42 @@ namespace Converter
 		void m_oWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
 			sheetJson = Parser.Excel2Json(sourceFileName);
+			//Console.Write(sheetJson);
 		}
+		
 		void m_oWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
-			UpdateTxtMethod("excel 文档加载完成.");
+			AppendTxtMethod(safeFileName + " 加载完成.");
+			button1.Enabled = true;
 			button2.Enabled = true;
 			button3.Enabled = true;
 		}
 		
 		
+		void UpdateProgress(){
+			AppendTxtMethod("开始载入文件: " + safeFileName);
+		}
 		
-		public void UpdateTxtMethod(string msg)
+		void DeleteLineMethod(int a_line)
+		{
+			int start_index = richTextBox1.GetFirstCharIndexFromLine(a_line);
+			if(start_index >-1){
+				int count = richTextBox1.Lines[a_line].Length;
+
+				// Eat new line chars
+				if (a_line < richTextBox1.Lines.Length - 1)
+				{
+					count += richTextBox1.GetFirstCharIndexFromLine(a_line + 1) -
+						((start_index + count - 1) + 1);
+				}
+
+				richTextBox1.Text = richTextBox1.Text.Remove(start_index, count);
+				
+				Console.Write(richTextBox1.Text);
+			}
+		}
+		
+		void AppendTxtMethod(string msg)
 		{
 			richTextBox1.AppendText(msg + "\r\n");
 			richTextBox1.ScrollToCaret();
@@ -86,16 +112,19 @@ namespace Converter
 
 			if (openFileDialog1.ShowDialog() == DialogResult.OK) {
 				
-				richTextBox1.Text = "开始载入文件";
+				safeFileName = openFileDialog1.SafeFileName ;
 				sourceFileName = openFileDialog1.FileName;
+				
+				AppendTxtMethod("开始载入文件: " + safeFileName);
 				
 				string directoryPath = Path.GetDirectoryName(sourceFileName);
 				openFileDialog1.InitialDirectory = directoryPath;
 				
 				textBox1.Text = sourceFileName;
+				button1.Enabled = false;
 				button2.Enabled = false;
 				button3.Enabled = false;
-								
+				
 				m_oWorker.RunWorkerAsync();
 				
 				/*Stream stream;
@@ -121,7 +150,7 @@ namespace Converter
 		{
 			
 			string fileName = SaveFile.ToHTML(sheetJson, sourceFileName);
-			UpdateTxtMethod(fileName + " 已保存");
+			AppendTxtMethod(fileName + " 已保存");
 			
 		}
 		
@@ -129,7 +158,7 @@ namespace Converter
 		void Button3Click(object sender, EventArgs e)
 		{
 			string fileName = SaveFile.ToPng(sheetJson, sourceFileName);
-			UpdateTxtMethod(fileName + " 已保存");
+			AppendTxtMethod(fileName + " 已保存");
 		}
 	}
 }

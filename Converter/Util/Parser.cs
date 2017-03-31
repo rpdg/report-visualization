@@ -51,11 +51,14 @@ namespace Converter.Util
 
 		public bool StartRow(int rowIndex)
 		{
-			return true;
+			return (rowIndex < 50000);
+			//return true;
 		}
 
 		public bool ProcessRow(Row row)
 		{
+			var cell = row.FirstCell;
+			Console.WriteLine(cell);
 			return true;
 		}
 
@@ -66,13 +69,13 @@ namespace Converter.Util
 
 		public bool ProcessCell(Cell cell)
 		{
-			cellCount++;
-			if (cell.IsFormula) {
-				formulaCount++;
-			} else if (cell.Type == CellValueType.IsString) {
-				stringCount++;
-			}
-			return false;
+//			cellCount++;
+//			if (cell.IsFormula) {
+//				formulaCount++;
+//			} else if (cell.Type == CellValueType.IsString) {
+//				stringCount++;
+//			}
+			return true;
 		}
 	}
 	
@@ -84,26 +87,34 @@ namespace Converter.Util
 	{
 		public static string Excel2Json(string fileFullName)
 		{
-			Workbook workbook = new Workbook(fileFullName);
-				
-			var ds = new DataSet();
+			
+			LoadOptions opts = new LoadOptions();
+			opts.MemorySetting = MemorySetting.MemoryPreference;
+			//opts.LoadDataAndFormatting = true;
+			//opts.LoadDataOnly = true;
+			//opts.IgnoreNotPrinted = true;
+			opts.LightCellsDataHandler = new LightCellsDataHandlerVisitCells();
+			
+			Workbook workbook = new Workbook(fileFullName , opts);
+			
+			
 			var dic = new Dictionary<String, List<DailyReport>>();
+			
+			//for (int i = 0; i < workbook.Worksheets.Count; i++) {
+			//Worksheet worksheet = workbook.Worksheets[i];
+			
+			foreach (Worksheet worksheet in workbook.Worksheets) {
 				
-			for (int i = 0; i < workbook.Worksheets.Count; i++) {
-				Worksheet worksheet = workbook.Worksheets[i];
-				//foreach (Worksheet worksheet in workbook.Worksheets) {
-					
 				string sheetName = worksheet.Name;
-					
+				
 				if (sheetName != "分析") {
 					DataTable tb = worksheet.Cells.ExportDataTable(0, 0, worksheet.Cells.MaxRow + 1, worksheet.Cells.MaxColumn + 1, true);
-					//ds.Tables.Add(tb);
 					List<DailyReport> drps = DataTable2DailyReport(tb, sheetName);
 					dic.Add(worksheet.Name, drps);
 				}
-					
-			}
 				
+			}
+			
 			return JsonHelper.Serialize(dic);
 		}
 		
@@ -111,6 +122,7 @@ namespace Converter.Util
 		{
 			using (stream) {
 				LoadOptions opts = new LoadOptions();
+				opts.MemorySetting = MemorySetting.MemoryPreference;
 				//opts.LightCellsDataHandler = new LightCellsDataHandlerVisitCells();
 				
 				Workbook workbook = new Workbook(stream, opts);
