@@ -106,7 +106,7 @@ namespace Converter.Util
 					int processedLines;
 				
 					DataTable tb = worksheet.Cells.ExportDataTable(0, 0, worksheet.Cells.MaxRow + 1, worksheet.Cells.MaxColumn + 1, true);
-					List<DailyReport> drps = DataTable2DailyReport(tb, sheetName , out processedLines);
+					List<DailyReport> drps = DataTable2DailyReport(tb, sheetName, out processedLines);
 					dic.Add(worksheet.Name, drps);
 
 					Logger.Write("处理表 [" + worksheet.Name + "]，共" + worksheet.Cells.MaxRow + "行，有效数据" + processedLines + "行", Color.Red);
@@ -126,7 +126,7 @@ namespace Converter.Util
 		/// <param name="tbName"></param>
 		/// <param name="processedLines"></param>
 		/// <returns></returns>
-		public static List<DailyReport> DataTable2DailyReport(DataTable tbSrc, string tbName , out int processedLines)
+		public static List<DailyReport> DataTable2DailyReport(DataTable tbSrc, string tbName, out int processedLines)
 		{
 			/*var rows = tb.AsEnumerable();
 			
@@ -143,7 +143,7 @@ namespace Converter.Util
 			dv.Sort = "BEGIN_TIME Asc";
 			DataTable tb = dv.ToTable();
 			
-			processedLines = 0 ;
+			processedLines = 0;
 			
 			var rptList = new List<DailyReport>();
 			
@@ -153,7 +153,11 @@ namespace Converter.Util
 				
 				DataRow row = tb.Rows[j];
 				
+				if (DBNull.Value.Equals(row[0]))
+					continue;
 				
+				
+				processedLines++;
 				var item = new ProduceItem {
 					ProgramLength = row[2].TryToDecimal(),
 					TaskDuration = row[6].TryToDecimal(),
@@ -163,7 +167,6 @@ namespace Converter.Util
 				
 				if (!string.IsNullOrEmpty(beginStr)) {
 					
-					processedLines++;
 						
 					try {
 						item.Begin = DateTime.Parse(beginStr);

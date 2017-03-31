@@ -2,10 +2,10 @@ D:\ams_analyze\Converter\bin\Release\Converter.exe.config
 D:\ams_analyze\Converter\bin\Release\Converter.exe
 D:\ams_analyze\Converter\bin\Release\Aspose.Cells.dll
 D:\ams_analyze\Converter\bin\Release\Newtonsoft.Json.dll
+D:\ams_analyze\Converter\bin\Release\NReco.ImageGenerator.dll
+D:\ams_analyze\Converter\bin\Release\Aspose.Cells.xml
+D:\ams_analyze\Converter\bin\Release\NReco.ImageGenerator.xml
 D:\ams_analyze\Converter\obj\Release\Converter.csprojResolveAssemblyReference.cache
 D:\ams_analyze\Converter\obj\Release\Converter.MainForm.resources
 D:\ams_analyze\Converter\obj\Release\Converter.csproj.GenerateResource.Cache
 D:\ams_analyze\Converter\obj\Release\Converter.exe
-D:\ams_analyze\Converter\bin\Release\NReco.ImageGenerator.dll
-D:\ams_analyze\Converter\bin\Release\NReco.ImageGenerator.xml
-D:\ams_analyze\Converter\bin\Release\Aspose.Cells.xml
