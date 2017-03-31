@@ -10,55 +10,44 @@ using System;
 using System.IO;
 using Aspose.Cells;
 using System.Data;
-using System.Text;
+using System.Drawing;
 using System.Collections.Generic;
 using Converter.Model;
 using System.Dynamic;
 using System.Linq;
+using Converter.Util;
+
 
 namespace Converter.Util
 {
 	class LightCellsDataHandlerVisitCells : LightCellsDataHandler
 	{
-		private int cellCount;
-		private int formulaCount;
-		private int stringCount;
 
 		internal LightCellsDataHandlerVisitCells()
 		{
-			cellCount = 0;
-			formulaCount = 0;
-			stringCount = 0;
 		}
 
-		public int CellCount {
-			get { return cellCount; }
-		}
-
-		public int FormulaCount {
-			get { return formulaCount; }
-		}
-
-		public int StringCount {
-			get { return stringCount; }
-		}
 
 		public bool StartSheet(Worksheet sheet)
 		{
-			Console.WriteLine("Processing sheet[" + sheet.Name + "]");
+			//Console.WriteLine("Processing sheet[" + sheet.Name + "]");
+			if (sheet.Name.Equals("分析"))
+				return false;
+			
+			Logger.Write("读取表 [" + sheet.Name + "]", Color.Navy);
 			return true;
 		}
 
 		public bool StartRow(int rowIndex)
 		{
-			return (rowIndex < 50000);
+			return (rowIndex < 100000);
 			//return true;
 		}
 
 		public bool ProcessRow(Row row)
 		{
-			var cell = row.FirstCell;
-			Console.WriteLine(cell);
+			//var cell = row.GetCellOrNull(1);
+			//Console.WriteLine(cell);
 			return true;
 		}
 
@@ -81,10 +70,16 @@ namespace Converter.Util
 	
 	
 	/// <summary>
-	/// Description of Parser.
+	/// parse the excel to json
 	/// </summary>
 	public static class Parser
 	{
+		
+		/// <summary>
+		/// parse the excel to json
+		/// </summary>
+		/// <param name="fileFullName">file name with full path</param>
+		/// <returns>json string</returns>
 		public static string Excel2Json(string fileFullName)
 		{
 			
@@ -95,7 +90,7 @@ namespace Converter.Util
 			//opts.IgnoreNotPrinted = true;
 			opts.LightCellsDataHandler = new LightCellsDataHandlerVisitCells();
 			
-			Workbook workbook = new Workbook(fileFullName , opts);
+			Workbook workbook = new Workbook(fileFullName, opts);
 			
 			
 			var dic = new Dictionary<String, List<DailyReport>>();
@@ -105,59 +100,33 @@ namespace Converter.Util
 			
 			foreach (Worksheet worksheet in workbook.Worksheets) {
 				
-				string sheetName = worksheet.Name;
+				if (worksheet.Cells.MaxRow > -1) {
+					
+					string sheetName = worksheet.Name;
+					int processedLines;
 				
-				if (sheetName != "分析") {
 					DataTable tb = worksheet.Cells.ExportDataTable(0, 0, worksheet.Cells.MaxRow + 1, worksheet.Cells.MaxColumn + 1, true);
-					List<DailyReport> drps = DataTable2DailyReport(tb, sheetName);
+					List<DailyReport> drps = DataTable2DailyReport(tb, sheetName , out processedLines);
 					dic.Add(worksheet.Name, drps);
+
+					Logger.Write("处理表 [" + worksheet.Name + "]，共" + worksheet.Cells.MaxRow + "行，有效数据" + processedLines + "行", Color.Red);
 				}
+				
 				
 			}
 			
 			return JsonHelper.Serialize(dic);
 		}
 		
-		public static string Excel2Json(Stream stream)
-		{
-			using (stream) {
-				LoadOptions opts = new LoadOptions();
-				opts.MemorySetting = MemorySetting.MemoryPreference;
-				//opts.LightCellsDataHandler = new LightCellsDataHandlerVisitCells();
-				
-				Workbook workbook = new Workbook(stream, opts);
-				stream.Close();
-				
-				var ds = new DataSet();
-				var dic = new Dictionary<String, List<DailyReport>>();
-				
-				for (int i = 0; i < workbook.Worksheets.Count; i++) {
-					Worksheet worksheet = workbook.Worksheets[i];
-					//foreach (Worksheet worksheet in workbook.Worksheets) {
-					
-					string sheetName = worksheet.Name;
-					
-					if (sheetName != "分析") {
-						DataTable tb = worksheet.Cells.ExportDataTable(0, 0, worksheet.Cells.MaxRow + 1, worksheet.Cells.MaxColumn + 1, true);
-						//ds.Tables.Add(tb);
-						List<DailyReport> drps = DataTable2DailyReport(tb, sheetName);
-						dic.Add(worksheet.Name, drps);
-					}
-					
-				}
-
-				
-				return JsonHelper.Serialize(dic);
-			}
-		}
 		
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="tbSrc"></param>
 		/// <param name="tbName"></param>
+		/// <param name="processedLines"></param>
 		/// <returns></returns>
-		public static List<DailyReport> DataTable2DailyReport(DataTable tbSrc, string tbName)
+		public static List<DailyReport> DataTable2DailyReport(DataTable tbSrc, string tbName , out int processedLines)
 		{
 			/*var rows = tb.AsEnumerable();
 			
@@ -173,6 +142,8 @@ namespace Converter.Util
 			DataView dv = tbSrc.DefaultView;
 			dv.Sort = "BEGIN_TIME Asc";
 			DataTable tb = dv.ToTable();
+			
+			processedLines = 0 ;
 			
 			var rptList = new List<DailyReport>();
 			
@@ -192,6 +163,8 @@ namespace Converter.Util
 				
 				if (!string.IsNullOrEmpty(beginStr)) {
 					
+					processedLines++;
+						
 					try {
 						item.Begin = DateTime.Parse(beginStr);
 						

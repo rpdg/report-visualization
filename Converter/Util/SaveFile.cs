@@ -43,7 +43,7 @@ namespace Converter.Util
 		
 		public static string ToPng(string json, string fileName)
 		{
-			string outFile = fileName.Substring(0, fileName.LastIndexOf(".", StringComparison.CurrentCultureIgnoreCase)) + ".png";
+			string outFile = fileName.Substring(0, fileName.LastIndexOf(".", StringComparison.CurrentCultureIgnoreCase)) + ".jpg";
 			
 			string dir = System.Environment.CurrentDirectory;
 			
@@ -52,7 +52,8 @@ namespace Converter.Util
 			
 			
 			var imageCons = new HtmlToImageConverter();
-			var bytes = imageCons.GenerateImage(h1 + json + h2, ImageFormat.Png);
+			imageCons.Width = 1200;
+			var bytes = imageCons.GenerateImage(h1 + json + h2, ImageFormat.Jpeg);
 			
 
 			using (StreamWriter sw = new System.IO.StreamWriter(outFile)) {

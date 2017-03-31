@@ -30,7 +30,7 @@ namespace Converter
 		string sourceFileName;
 		string safeFileName;
 		
-		BackgroundWorker m_oWorker;
+		BackgroundWorker parseWorker;
 		
 		
 		public MainForm()
@@ -41,63 +41,34 @@ namespace Converter
 			InitializeComponent();
 			//Control.CheckForIllegalCrossThreadCalls = false;
 			
+			Logger.Init(richTextBox1);
 			
-			
-			m_oWorker = new BackgroundWorker();
+			parseWorker = new BackgroundWorker();
 			
 			// Create a background worker thread that ReportsProgress &
 			// SupportsCancellation
 			// Hook up the appropriate events.
-			m_oWorker.DoWork += new DoWorkEventHandler(m_oWorker_DoWork);
+			parseWorker.DoWork += new DoWorkEventHandler(StartParse);
 			//m_oWorker.ProgressChanged += new ProgressChangedEventHandler(m_oWorker_ProgressChanged);
-			m_oWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_oWorker_RunWorkerCompleted);
+			parseWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(FinishParse);
 			//m_oWorker.WorkerReportsProgress = true;
 			//m_oWorker.WorkerSupportsCancellation = true;
 		}
 		
-		void m_oWorker_DoWork(object sender, DoWorkEventArgs e)
+		void StartParse(object sender, DoWorkEventArgs e)
 		{
 			sheetJson = Parser.Excel2Json(sourceFileName);
 			//Console.Write(sheetJson);
 		}
 		
-		void m_oWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+		void FinishParse(object sender, RunWorkerCompletedEventArgs e)
 		{
-			AppendTxtMethod(safeFileName + " 加载完成.");
+			Logger.Write(safeFileName + " 处理完成，可选择转为 HTML 或 JPEG" , Color.Black);
 			button1.Enabled = true;
 			button2.Enabled = true;
 			button3.Enabled = true;
 		}
 		
-		
-		void UpdateProgress(){
-			AppendTxtMethod("开始载入文件: " + safeFileName);
-		}
-		
-		void DeleteLineMethod(int a_line)
-		{
-			int start_index = richTextBox1.GetFirstCharIndexFromLine(a_line);
-			if(start_index >-1){
-				int count = richTextBox1.Lines[a_line].Length;
-
-				// Eat new line chars
-				if (a_line < richTextBox1.Lines.Length - 1)
-				{
-					count += richTextBox1.GetFirstCharIndexFromLine(a_line + 1) -
-						((start_index + count - 1) + 1);
-				}
-
-				richTextBox1.Text = richTextBox1.Text.Remove(start_index, count);
-				
-				Console.Write(richTextBox1.Text);
-			}
-		}
-		
-		void AppendTxtMethod(string msg)
-		{
-			richTextBox1.AppendText(msg + "\r\n");
-			richTextBox1.ScrollToCaret();
-		}
 		
 		
 		void Button1Click(object sender, EventArgs e)
@@ -115,7 +86,7 @@ namespace Converter
 				safeFileName = openFileDialog1.SafeFileName ;
 				sourceFileName = openFileDialog1.FileName;
 				
-				AppendTxtMethod("开始载入文件: " + safeFileName);
+				Logger.Write("开始载入文件: " + safeFileName , Color.Brown);
 				
 				string directoryPath = Path.GetDirectoryName(sourceFileName);
 				openFileDialog1.InitialDirectory = directoryPath;
@@ -125,7 +96,7 @@ namespace Converter
 				button2.Enabled = false;
 				button3.Enabled = false;
 				
-				m_oWorker.RunWorkerAsync();
+				parseWorker.RunWorkerAsync();
 				
 				/*Stream stream;
 				try {
@@ -150,7 +121,7 @@ namespace Converter
 		{
 			
 			string fileName = SaveFile.ToHTML(sheetJson, sourceFileName);
-			AppendTxtMethod(fileName + " 已保存");
+			Logger.Write( fileName + " 已保存" , Color.Green);
 			
 		}
 		
@@ -158,7 +129,7 @@ namespace Converter
 		void Button3Click(object sender, EventArgs e)
 		{
 			string fileName = SaveFile.ToPng(sheetJson, sourceFileName);
-			AppendTxtMethod(fileName + " 已保存");
+			Logger.Write(fileName + " 已保存" , Color.Green);
 		}
 	}
 }

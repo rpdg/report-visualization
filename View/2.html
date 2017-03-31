@@ -6,11 +6,13 @@
 	<title>Title</title>
 	<link rel="stylesheet" href="css/highcharts.css">
 	<style>
-		*{
+		div{
 			box-sizing: border-box;
+			font-family: "Microsoft Yahei", Tahoma , Arial, sans-serif;
 		}
 		h1{
 			text-align:center;
+			font-weight: 100 ;
 		}
 		#warp{
 			text-align: center;
@@ -22,7 +24,7 @@
 		}
 		.chart {
 			display: inline-block;
-			width: 480px;
+			width: 550px;
 			height: 300px;
 			border: 1px solid #999;
 			background-color: #fff;
@@ -90,8 +92,12 @@
 			},
 			plotOptions: {
 				column: {
-					pointPadding: 0.05,
-					borderWidth: 0
+					pointPadding: 0.2,
+					borderWidth: 0,
+					dataLabels: {
+						enabled: false ,
+						style: { "fontSize": "9px", "fontWeight": "normal" }
+					}
 				}
 			},
 			series: [{
@@ -131,8 +137,12 @@
 			},
 			plotOptions: {
 				column: {
-					pointPadding: 0.05,
-					borderWidth: 0
+					pointPadding: 0.2,
+					borderWidth: 0,
+					dataLabels: {
+						enabled: false ,
+						style: { "fontSize": "9px", "fontWeight": "normal" }
+					}
 				}
 			},
 			tooltip: {
@@ -223,6 +233,7 @@
 						enabled: true,
 						style: { "fontSize": "11px", "fontWeight": "normal" },
 						formatter: function (){
+							if(this.y==0) return '未完成';
 							return '1:' + (1/this.y).toFixed(1);
 						}
 					},
