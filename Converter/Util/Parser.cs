@@ -23,31 +23,43 @@ namespace Converter.Util
 	class LightCellsDataHandlerVisitCells : LightCellsDataHandler
 	{
 
+		bool readNewRow;
+		bool firstCellHasValue;
+		
 		internal LightCellsDataHandlerVisitCells()
 		{
+			//readNewRow = true;
+			//firstCellHasValue = true;
 		}
 
 
 		public bool StartSheet(Worksheet sheet)
 		{
-			//Console.WriteLine("Processing sheet[" + sheet.Name + "]");
-			if (sheet.Name.Equals("分析"))
+			if (sheet.Name.Equals("分析" , StringComparison.CurrentCultureIgnoreCase))
 				return false;
 			
+			readNewRow = true ;
+			firstCellHasValue = true;
 			Logger.Write("读取表 [" + sheet.Name + "]", Color.Navy);
 			return true;
 		}
 
 		public bool StartRow(int rowIndex)
 		{
-			return (rowIndex < 100000);
-			//return true;
+			readNewRow = true;
+			
+			return firstCellHasValue;
 		}
 
 		public bool ProcessRow(Row row)
 		{
 			//var cell = row.GetCellOrNull(1);
 			//Console.WriteLine(cell);
+			
+			if (row.Index > 3) {
+				Console.WriteLine(row);
+			}
+			
 			return true;
 		}
 
@@ -58,13 +70,17 @@ namespace Converter.Util
 
 		public bool ProcessCell(Cell cell)
 		{
-//			cellCount++;
-//			if (cell.IsFormula) {
-//				formulaCount++;
-//			} else if (cell.Type == CellValueType.IsString) {
-//				stringCount++;
-//			}
-			return true;
+			if (readNewRow) {
+				
+				readNewRow = false;
+				
+				if (cell.Column != 0)
+					firstCellHasValue = false;
+			}
+			
+			
+			
+			return firstCellHasValue;
 		}
 	}
 	
@@ -87,7 +103,7 @@ namespace Converter.Util
 			opts.MemorySetting = MemorySetting.MemoryPreference;
 			//opts.LoadDataAndFormatting = true;
 			//opts.LoadDataOnly = true;
-			//opts.IgnoreNotPrinted = true;
+			opts.IgnoreNotPrinted = true;
 			opts.LightCellsDataHandler = new LightCellsDataHandlerVisitCells();
 			
 			Workbook workbook = new Workbook(fileFullName, opts);
@@ -104,10 +120,11 @@ namespace Converter.Util
 					
 					string sheetName = worksheet.Name;
 					int processedLines;
-				
+					
 					DataTable tb = worksheet.Cells.ExportDataTable(0, 0, worksheet.Cells.MaxRow + 1, worksheet.Cells.MaxColumn + 1, true);
 					List<DailyReport> drps = DataTable2DailyReport(tb, sheetName, out processedLines);
 					dic.Add(worksheet.Name, drps);
+					tb.Dispose();
 
 					Logger.Write("处理表 [" + worksheet.Name + "]，共" + worksheet.Cells.MaxRow + "行，有效数据" + processedLines + "行", Color.Red);
 				}
@@ -120,7 +137,7 @@ namespace Converter.Util
 		
 		
 		/// <summary>
-		/// 
+		/// Convert DataTable to daily report list
 		/// </summary>
 		/// <param name="tbSrc"></param>
 		/// <param name="tbName"></param>
@@ -138,6 +155,7 @@ namespace Converter.Util
 				};
 			
 			return query.ToList();*/
+			
 			
 			DataView dv = tbSrc.DefaultView;
 			dv.Sort = "BEGIN_TIME Asc";
@@ -167,7 +185,7 @@ namespace Converter.Util
 				
 				if (!string.IsNullOrEmpty(beginStr)) {
 					
-						
+					
 					try {
 						item.Begin = DateTime.Parse(beginStr);
 						
@@ -192,6 +210,7 @@ namespace Converter.Util
 				
 				
 			}
+			tb.Dispose();
 			
 			foreach (string dateKey in dic.Keys) {
 				var list = dic[dateKey];

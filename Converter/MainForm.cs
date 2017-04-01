@@ -67,6 +67,11 @@ namespace Converter
 			button1.Enabled = true;
 			button2.Enabled = true;
 			button3.Enabled = true;
+			
+			
+			if(checkBox2.Checked){
+				GenerateImage();
+			}
 		}
 		
 		
@@ -86,7 +91,7 @@ namespace Converter
 				safeFileName = openFileDialog1.SafeFileName ;
 				sourceFileName = openFileDialog1.FileName;
 				
-				Logger.Write("开始载入文件: " + safeFileName , Color.Brown);
+				Logger.Write("载入文件: " + safeFileName , Color.Brown);
 				
 				string directoryPath = Path.GetDirectoryName(sourceFileName);
 				openFileDialog1.InitialDirectory = directoryPath;
@@ -98,23 +103,15 @@ namespace Converter
 				
 				parseWorker.RunWorkerAsync();
 				
-				/*Stream stream;
-				try {
-					if ((stream = openFileDialog1.OpenFile()) != null) {
-						using (stream) {
-							sheetJson = Parser.Excel2Json(stream);
-							stream.Close();
-						}
-
-					}
-				} catch (Exception ex) {
-					//MessageBox.Show("Error:  " + ex.Message);
-					UpdateTxtMethod("Error:  " + ex.Message);
-				}*/
 			}
 		}
 		
 		
+		void GenerateImage()
+		{
+			string fileName = SaveFile.ToPng(sheetJson, sourceFileName);
+			Logger.Write(fileName + " 已保存" , Color.Green);
+		}
 		
 		
 		void Button2Click(object sender, EventArgs e)
@@ -128,8 +125,7 @@ namespace Converter
 		
 		void Button3Click(object sender, EventArgs e)
 		{
-			string fileName = SaveFile.ToPng(sheetJson, sourceFileName);
-			Logger.Write(fileName + " 已保存" , Color.Green);
+			GenerateImage();
 		}
 	}
 }
