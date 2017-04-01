@@ -32,15 +32,15 @@ namespace Converter.Model
 		public decimal TotalProgramTimeLength {get; set;}
 		
 		//节目平均时长		
-		public decimal AverageProgramTimeLength {get; set;}
+		//public decimal AverageProgramTimeLength {get; set;}
 		
 		//总耗时
 		public decimal TotalTaskDuration {get; set;}
 		
 		//平均耗时		
-		public decimal AverageTaskDuration {get; set;}
+		//public decimal AverageTaskDuration {get; set;}
 		
-		//生产效率
+		//生产效率(节目时长：生产耗时)
 		public decimal Efficiency {get; set;}
 	}
 	

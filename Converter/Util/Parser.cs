@@ -35,10 +35,10 @@ namespace Converter.Util
 
 		public bool StartSheet(Worksheet sheet)
 		{
-			if (sheet.Name.Equals("分析" , StringComparison.CurrentCultureIgnoreCase))
+			if (sheet.Name.Equals("分析", StringComparison.CurrentCultureIgnoreCase))
 				return false;
 			
-			readNewRow = true ;
+			readNewRow = true;
 			firstCellHasValue = true;
 			Logger.Write("读取表 [" + sheet.Name + "]", Color.Navy);
 			return true;
@@ -124,7 +124,7 @@ namespace Converter.Util
 					DataTable tb = worksheet.Cells.ExportDataTable(0, 0, worksheet.Cells.MaxRow + 1, worksheet.Cells.MaxColumn + 1, true);
 					List<DailyReport> drps = DataTable2DailyReport(tb, sheetName, out processedLines);
 					dic.Add(worksheet.Name, drps);
-					tb.Dispose();
+					//tb.Dispose();
 
 					Logger.Write("处理表 [" + worksheet.Name + "]，共" + worksheet.Cells.MaxRow + "行，有效数据" + processedLines + "行", Color.Red);
 				}
@@ -139,11 +139,11 @@ namespace Converter.Util
 		/// <summary>
 		/// Convert DataTable to daily report list
 		/// </summary>
-		/// <param name="tbSrc"></param>
+		/// <param name="tb"></param>
 		/// <param name="tbName"></param>
 		/// <param name="processedLines"></param>
 		/// <returns></returns>
-		public static List<DailyReport> DataTable2DailyReport(DataTable tbSrc, string tbName, out int processedLines)
+		public static List<DailyReport> DataTable2DailyReport(DataTable tb, string tbName, out int processedLines)
 		{
 			/*var rows = tb.AsEnumerable();
 			
@@ -157,9 +157,11 @@ namespace Converter.Util
 			return query.ToList();*/
 			
 			
-			DataView dv = tbSrc.DefaultView;
+			/*DataView dv = tbSrc.DefaultView;
 			dv.Sort = "BEGIN_TIME Asc";
-			DataTable tb = dv.ToTable();
+			DataTable tb = dv.ToTable();*/
+			tb.DefaultView.Sort = "BEGIN_TIME Asc";
+			tb = tb.DefaultView.ToTable();
 			
 			processedLines = 0;
 			
@@ -170,47 +172,40 @@ namespace Converter.Util
 			for (int j = 0; j < tb.Rows.Count; j++) {
 				
 				DataRow row = tb.Rows[j];
-				
-				if (DBNull.Value.Equals(row[0]))
-					continue;
-				
-				
-				processedLines++;
-				var item = new ProduceItem {
-					ProgramLength = row[2].TryToDecimal(),
-					TaskDuration = row[6].TryToDecimal(),
-				};
+								
 				
 				var beginStr = row[4].TrimToString();
 				
 				if (!string.IsNullOrEmpty(beginStr)) {
 					
+					processedLines++;
 					
-					try {
-						item.Begin = DateTime.Parse(beginStr);
+					var item = new ProduceItem {
+						ProgramLength = row[2].TryToDecimal(),
+						TaskDuration = row[6].TryToDecimal(),
+						Begin = DateTime.Parse(beginStr),
+					};
 						
 						
-						var endStr = row[5].TrimToString();
-						if (!string.IsNullOrEmpty(endStr))
-							item.End = DateTime.Parse(endStr);
+					var endStr = row[5].TrimToString();
+					if (!string.IsNullOrEmpty(endStr))
+						item.End = DateTime.Parse(endStr);
 						
 						
-						string key = item.Begin.ToString("yyyy-MM-dd");
+					string key = item.Begin.ToString("yyyy-MM-dd");
 						
-						if (!dic.ContainsKey(key)) {
-							dic.Add(key, new List<ProduceItem>());
-						}
-						
-						dic[key].Add(item);
-					} catch (Exception e) {
-						throw new Exception(tbName + ", 第" + j + "行发生错误");
+					if (!dic.ContainsKey(key)) {
+						dic.Add(key, new List<ProduceItem>());
 					}
+						
+					dic[key].Add(item);
+						
 				}
 				
 				
 				
 			}
-			tb.Dispose();
+			//tb.Dispose();
 			
 			foreach (string dateKey in dic.Keys) {
 				var list = dic[dateKey];
@@ -243,19 +238,19 @@ namespace Converter.Util
 				};
 				
 				if (finished > 0) {
-					//平均时长
-					rpt.AverageProgramTimeLength = Math.Round(totalLength / finished, 1);
+					//平均时长(分)
+					//rpt.AverageProgramTimeLength = Math.Round(totalLength / finished, 1);
 					
-					//平均耗时
-					rpt.AverageTaskDuration = Math.Round(totalTaskDuration / finished, 1);
+					//平均耗时(分)
+					//rpt.AverageTaskDuration = Math.Round(totalTaskDuration / finished, 1);
 					
 					//完成率(百分数)
 					rpt.AccomplishmentRatio = Math.Round(finished / progCount * 100, 2);
 					
 					//效率
-					//excel统计中，会将几秒钟的任务认为是0分钟，所以会出现执行时长为0的情况
-					if (totalTaskDuration > 0)
-						rpt.Efficiency = Math.Round(totalLength / totalTaskDuration, 2);
+					//excel原始表格中，会将几秒钟的任务认为是0分钟，所以会出现执行时长为0的情况
+					if (totalLength>0 && totalTaskDuration > 0)
+						rpt.Efficiency = Math.Round(totalLength / totalTaskDuration, 5);
 				}
 				
 				rptList.Add(rpt);
