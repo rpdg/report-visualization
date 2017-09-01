@@ -11,4 +11,3 @@ D:\ams_analyze\Converter\obj\Debug\Converter.pdb
 D:\ams_analyze\Converter\bin\Debug\NReco.ImageGenerator.dll
 D:\ams_analyze\Converter\bin\Debug\NReco.ImageGenerator.xml
 D:\ams_analyze\Converter\bin\Debug\Aspose.Cells.xml
-D:\ams_analyze\Converter\obj\Debug\Converter.csproj.Converter.exe.config
