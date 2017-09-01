@@ -20,7 +20,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>False</RunCodeAnalysis>
-	<AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
+    <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
     <SourceAnalysisOverrideSettingsFile>C:\Users\opg\AppData\Roaming\ICSharpCode\SharpDevelop5\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
@@ -59,7 +59,7 @@
       <HintPath>dll\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NReco.ImageGenerator">
-      <HintPath>dll\NReco.ImageGenerator.dll</HintPath>
+      <HintPath>..\..\develop\xiaobao\converter\dll\NReco.ImageGenerator.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections" />
